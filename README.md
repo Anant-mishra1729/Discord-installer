@@ -2,6 +2,13 @@
 
 Shell script to install discord in any linux distribution
 
+## Usage
+Copy the script and save it in any file like `discord_setup.sh`  and run it with sudo privilege
+```sh
+sudo sh discord_setup.sh
+```
+
+
 ## Script
 ```sh
 # Shell script to setup discord in linux
