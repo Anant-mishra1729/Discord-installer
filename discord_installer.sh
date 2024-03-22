@@ -31,7 +31,7 @@ else
 fi
 
 # Create a symbolic link of the discord executable in /usr/bin
-sudo ln -s /opt/Discord/Discord /usr/bin/Discord
+sudo ln -sf /opt/Discord/Discord /usr/bin/Discord
 
 # Check if the symbolic link was created successfully
 if [ $? -eq 0 ]; then
