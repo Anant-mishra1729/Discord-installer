@@ -10,78 +10,77 @@ sudo sh discord_setup.sh
 
 
 ## Script
-```sh
-# Shell script to setup discord in linux
+```bash
+#!/bin/bash
 
-# Download the discord tar file
+# Prompt for reinstall
+prompt_reinstall() {
+    read -rp "Discord is already installed. Do you want to reinstall it? (y/n): " choice
+    case "$choice" in
+        [yY]|[yY][eE][sS])
+            return 0  # Reinstall
+            ;;
+        *)
+            return 1  # Do not reinstall
+            ;;
+    esac
+}
+
+# Checking for dependencies
+if ! command -v wget &>/dev/null; then
+    echo -e "\e[1;31mError: 'wget' is not installed. Please install it and try again.\e[0m"
+    exit 1
+fi
+
+# Checking if Discord is already installed
+if command -v Discord &>/dev/null; then
+    if prompt_reinstall; then
+        echo -e "\e[1;33mRemoving existing Discord installation...\e[0m"
+        sudo rm -rf "/opt/Discord" "/usr/bin/Discord" "/usr/share/applications/discord.desktop"
+    else
+        echo -e "\e[1;33mSkipping setup.\e[0m"
+        exit 0
+    fi
+fi
+
+# Downloading the Discord tar file
 FILENAME="discord.tar.gz"
 URL="https://discordapp.com/api/download?platform=linux&format=tar.gz"
 
-# Colored echo
-echo -e "\n\e[1;32mDownloading Discord tar file\e[0m"
-
-wget -O $FILENAME $URL
-
-# Check if the download was successful
-if [ $? -eq 0 ]; then
-    echo -e "\n\e[1;32mDownload successful\e[0m"
-else
-    echo -e "\n\e[1;31mDownload failed\e[0m"
+echo -e "\n\e[1;32mDownloading Discord tar file...\e[0m"
+if ! wget -O "$FILENAME" "$URL"; then
+    echo -e "\e[1;31mError: Download failed. Please check your internet connection or try again later.\e[0m"
     exit 1
 fi
 
-# Extract the tar file in /opt directory
-echo -e "\n\e[1;33mExtracting the tar file\e[0m"
-
-sudo tar -xvf $FILENAME -C /opt/
-
-# Check if the extraction was successful
-if [ $? -eq 0 ]; then
-    echo -e "\n\e[1;32mExtraction successful\e[0m"
-else
-    echo -e "\n\e[1;31mExtraction failed\e[0m"
+# Extracting the tar file
+echo -e "\n\e[1;33mExtracting the tar file...\e[0m"
+if ! sudo tar -xvf "$FILENAME" -C /opt/; then
+    echo -e "\e[1;31mError: Extraction failed.\e[0m"
     exit 1
 fi
 
-# Create a symbolic link of the discord executable in /usr/bin
-sudo ln -sf /opt/Discord/Discord /usr/bin/Discord
-
-# Check if the symbolic link was created successfully
-if [ $? -eq 0 ]; then
-    echo -e "\n\e[1;32mSymbolic link created successfully\e[0m"
-else
-    echo -e "\n\e[1;31mSymbolic link creation failed\e[0m"
+# Creating symbolic link
+if ! sudo ln -sf "/opt/Discord/Discord" "/usr/bin/Discord"; then
+    echo -e "\e[1;31mError: Symbolic link creation failed.\e[0m"
     exit 1
 fi
 
-# Create a desktop file for discord
-echo -e "\n\e[1;33mCreating desktop file for discord\e[0m"
-
-# Replace Exec=/usr/share/discord/Discord with Exec=Discord
-sudo sed -i 's/Exec=\/usr\/share\/discord\/Discord/Exec=Discord/g' /opt/Discord/discord.desktop
-
-sudo cp /opt/Discord/discord.desktop /usr/share/applications/
-
-# Check if the desktop file was created successfully
-if [ $? -eq 0 ]; then
-    echo -e "\n\e[1;32mDesktop file created successfully\e[0m"
-else
-    echo -e "\n\e[1;31mDesktop file creation failed\e[0m"
+# Modifying desktop file
+echo -e "\n\e[1;33mModifying desktop file...\e[0m"
+if ! sudo sed -i 's/Exec=\/usr\/share\/discord\/Discord/Exec=Discord/g' "/opt/Discord/discord.desktop" \
+    || ! sudo cp "/opt/Discord/discord.desktop" "/usr/share/applications/"; then
+    echo -e "\e[1;31mError: Desktop file modification failed.\e[0m"
     exit 1
 fi
 
-# Clean up the downloaded tar file
-echo -e "\n\e[1;33mCleaning up the downloaded tar file\e[0m"
-rm $FILENAME
-
-# Check if the cleanup was successful
-if [ $? -eq 0 ]; then
-    echo -e "\n\e[1;32mCleanup successful\e[0m"
-else
-    echo -e "\n\e[1;31mCleanup failed\e[0m"
+# Cleanup
+echo -e "\n\e[1;33mCleaning up...\e[0m"
+if ! rm "$FILENAME"; then
+    echo -e "\e[1;31mError: Cleanup failed.\e[0m"
     exit 1
 fi
 
-# echo completion message
-echo -e "\n\e[1;32mDiscord setup completed successfully\e[0m"
+# Completion message
+echo -e "\n\e[1;32mDiscord setup completed successfully.\e[0m"
 ```
