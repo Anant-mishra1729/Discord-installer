@@ -1,15 +1,15 @@
-# Discord installer
+# Discord setup linux
 
-Shell script to install discord in any linux distribution
+Handy scripts to get Discord up and running, or remove it completely, on your Linux system - it works on any version!
 
 ## Usage
-Copy the script and save it in any file like `discord_setup.sh`  and run it with sudo privilege
+
+### Installer
+Copy the script and save it in any file like `discord_install.sh` & `discord_uninstall.sh` , execute it with sudo privileges.
 ```sh
 sudo sh discord_setup.sh
 ```
 
-
-## Script
 ```bash
 #!/bin/bash
 
@@ -84,3 +84,75 @@ fi
 # Completion message
 echo -e "\n\e[1;32mDiscord setup completed successfully.\e[0m"
 ```
+
+### Uninstaller
+
+```sh
+sudo sh discord_uninstall.sh
+```
+
+```bash
+#!/bin/bash
+
+# Function to prompt for uninstallation
+prompt_uninstall() {
+    read -rp "Do you want to uninstall Discord? (y/n): " choice
+    case "$choice" in
+        [yY]|[yY][eE][sS])
+            return 0  # Uninstall
+            ;;
+        *)
+            return 1  # Do not uninstall
+            ;;
+    esac
+}
+
+# Function to prompt for config file removal
+prompt_config_removal() {
+    read -rp "Do you also want to remove Discord configuration files? (y/n): " choice
+    case "$choice" in
+        [yY]|[yY][eE][sS])
+            return 0  # Remove config files
+            ;;
+        *)
+            return 1  # Do not remove config files
+            ;;
+    esac
+}
+
+# Check if Discord is installed
+if ! command -v Discord &>/dev/null; then
+    echo -e "\e[1;33mDiscord is not installed on your system.\e[0m"
+    exit 0
+fi
+
+# Prompt for uninstallation
+if ! prompt_uninstall; then
+    echo -e "\e[1;33mSkipping uninstallation.\e[0m"
+    exit 0
+fi
+
+# Remove Discord files and symbolic link
+echo -e "\n\e[1;32mUninstalling Discord...\e[0m"
+sudo rm -rf "/opt/Discord" "/usr/bin/Discord" "/usr/share/applications/discord.desktop"
+
+# Prompt for config file removal
+if prompt_config_removal; then
+    echo -e "\n\e[1;32mRemoving Discord configuration files...\e[0m"
+    config_dir="$HOME/.config/discord"
+    if [ -d "$config_dir" ]; then
+        rm -rf "$config_dir"
+        echo -e "\e[1;32mDiscord configuration files removed successfully.\e[0m"
+    else
+        echo -e "\e[1;33mDiscord configuration directory not found.\e[0m"
+    fi
+fi
+
+# Check if uninstallation was successful
+if [ $? -eq 0 ]; then
+    echo -e "\n\e[1;32mDiscord has been successfully uninstalled.\e[0m"
+else
+    echo -e "\n\e[1;31mError: Uninstallation failed.\e[0m"
+fi
+```
+
